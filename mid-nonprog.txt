@@ -1,0 +1,5 @@
+Explain what entropy is in detail.
+Cover its meaning and formulas in physics, information theory, and machine learning.
+Include intuitive explanations, simple mathematical expressions, and short examples for each field.
+At the end, provide a brief comparison table summarizing how entropy is interpreted across these domains, and explain it in simple everyday terms as well.
+Keep the tone educational but concise, with clear sections and optional emojis or formatting for readability.
