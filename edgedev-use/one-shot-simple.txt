@@ -1,0 +1,1 @@
+ONE-SHOT SUMMARY: Summarize the following text into a single, key sentence. Text: "Hi Ann, I just wanted to confirm that our meeting about Project X will take place tomorrow, Wednesday, at 3:00 PM in conference room number 3. Please bring the latest sales data with you. Best, John."

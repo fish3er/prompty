@@ -1,0 +1,277 @@
+Build a secure, maintainable, and scalable web shop for a small company selling physical (and optionally digital) products. Focus on fast time-to-market, good developer DX, and clear operational practices.
+
+1. High-level scope & priorities
+MVP (phase 1):
+- Product catalog and product pages
+- Shopping cart
+- Checkout (payments via Stripe or equivalent)
+- Order management (user + admin)
+- User accounts (register/login/profile, order history)
+- Basic admin dashboard (product CRUD, orders, customers)
+- Search and category filtering
+- Responsive UI (mobile-first)
+Phase 2+:
+- Discounts, coupons, gift cards
+- Subscriptions / recurring billing
+- Multi-warehouse / shipping integration
+- Multi-language / internationalization
+- Marketplace features, multi-vendor
+- PWA / mobile app
+
+2. Recommended tech stack
+- Frontend: React (Vite) + TypeScript, Tailwind CSS
+- Backend: Python (FastAPI) or Node.js (NestJS/Express)
+- Database: PostgreSQL
+- Cache: Redis (sessions, rate limiting, caching)
+- Search: Elasticsearch / OpenSearch or PostgreSQL full-text search
+- Storage: S3-compatible object storage
+- Payments: Stripe, optional PayPal
+- Task queue: Celery + Redis
+- Auth: JWT + refresh tokens; OAuth optional
+- Containerization: Docker
+- Orchestration: Kubernetes or Docker Compose
+- CI/CD: GitHub Actions or GitLab CI
+- Monitoring: Prometheus + Grafana, Sentry
+- Tests: pytest + factory_boy (Python) or Jest (frontend)
+- Linting/Formatting: Prettier + ESLint + black + isort
+- Infrastructure as Code: Terraform
+
+3. Users / Roles
+- Guest — browse, search, add to cart
+- Customer — register/login, place orders, order history, addresses, payment methods
+- Admin / Store Manager — manage products, inventory, orders, shipments, refunds
+- Support / Staff — view orders, update statuses, issue refunds (limited)
+- Super Admin — system settings, manage users/roles
+
+4. Core features & flows
+Customer flows:
+- Browse categories, search, filter, sort
+- Product details (images, variants, stock per warehouse)
+- Add/update/remove cart items
+- Checkout: shipping, payment, order review
+- Confirmation + email receipt
+- User account: profile, addresses, payment methods, order history
+- Returns / refunds request
+Admin flows:
+- Product CRUD with images and variants
+- Inventory control
+- Order dashboard: view, update status
+- Customer management
+- Reports: sales, inventory, popular products
+- Settings: payment gateway, shipping rates, tax rules
+
+5. Data model (relational)
+Entities (core columns; timestamps included):
+Users: id, email, password_hash, first_name, last_name, phone, is_active, is_staff, is_superuser, created_at, updated_at
+Products: id, name, slug, description, sku, brand, price, currency, published, category_id, weight, dimensions, meta, created_at, updated_at
+ProductVariants: id, product_id, sku, attributes(json), price_override, stock_quantity, active, created_at, updated_at
+Categories: id, name, slug, parent_id, description
+Images/Media: id, product_id, url, alt_text, position
+Cart: id, user_id(session nullable), created_at
+CartItems: cart_id, variant_id, quantity, price_at_add
+Orders: id, user_id, status, total_amount, currency, billing_address_id, shipping_address_id, payment_status, placed_at
+OrderItems: order_id, variant_id, unit_price, quantity, line_total
+Addresses: id, user_id, type, line1, line2, city, state, postal_code, country, phone
+Payments: id, order_id, provider, provider_payment_id, amount, currency, status, metadata(json), created_at
+Shipments: id, order_id, carrier, tracking_number, status, shipped_at
+Discounts/Coupons: id, code, discount_type, value, usage_limit, expires_at, active
+Audit/Events: id, object_type, object_id, action, actor_id, metadata, created_at
+Indices: products.slug, products.name(GIN), variants.sku unique, orders.user_id, payments.provider_payment_id unique
+
+6. REST API (v1)
+Base: /api/v1/
+
+Auth:
+- POST /auth/register
+- POST /auth/login
+- POST /auth/refresh
+- POST /auth/logout
+- POST /auth/password-reset
+- POST /auth/password-reset/confirm
+
+Products & Catalog:
+- GET /products
+- GET /products/{slug}
+- GET /products/{id}/variants
+- POST /products
+- PUT /products/{id}
+- DELETE /products/{id}
+- GET /categories
+- GET /categories/{id}
+
+Cart:
+- GET /cart
+- POST /cart/items
+- PUT /cart/items/{item_id}
+- DELETE /cart/items/{item_id}
+
+Checkout & Orders:
+- POST /checkout
+- GET /orders
+- GET /orders/{id}
+- POST /orders/{id}/cancel
+- POST /orders/{id}/refund
+
+Payments (webhook):
+- POST /payments/webhook
+
+Shipping:
+- GET /shipping/methods
+- POST /shipments/{order_id}/create
+- PUT /shipments/{id}/track
+
+Admin:
+- GET /admin/products/stats
+- GET /admin/orders
+- POST /admin/import/products
+
+Search/Suggestions:
+- GET /search
+- GET /search/suggest
+
+Health & Meta:
+- GET /health
+- GET /metrics
+
+7. API design considerations
+- OpenAPI / Swagger
+- Versioning: /api/v1/
+- Pagination: cursor or offset
+- Strong typing (TS frontend, Pydantic backend)
+- Consistent error format {code, message, details?}
+- Rate limiting per user/IP
+
+8. Frontend pages
+Public: Home, Category listing, Product detail, Search results, About, Contact, Policies, Login/Register
+Account: Dashboard, Orders, Profile, Wish list
+Checkout: Cart review, Shipping details, Shipping method, Payment, Confirmation
+Admin: Product management, Order management, Inventory, Reports, Settings
+
+9. Security & privacy
+- HTTPS, HSTS
+- Password hashing (bcrypt/argon2)
+- Encrypt sensitive data
+- PCI compliance (tokenized payments)
+- Rate limiting, IP throttling
+- CSRF protection
+- CORS restriction
+- Input validation, ORM prepared statements
+- XSS protection
+- GDPR endpoints: export, delete
+- Audit logs
+
+10. Resiliency & performance
+- DB pooling, prepared statements
+- Redis cache for products/cart/auth
+- CDN for assets
+- Background tasks (Celery)
+- Read replicas
+- Pagination, limited results
+- CDN + compression
+- Index DB columns for filters/joins
+
+11. Testing strategy
+- Unit tests: business logic, pricing, discounts
+- Integration tests: API routes, DB operations
+- E2E tests: checkout, flows (Playwright/Cypress)
+- Contract tests: payment webhooks
+- Load testing: k6/Locust
+- Security tests: SAST/DAST
+
+12. Observability & logging
+- Structured logs (JSON), ELK/Loki
+- Sentry for errors
+- Prometheus metrics
+- Alerts: errors, latency, business KPIs
+- Distributed tracing (OpenTelemetry/Jaeger)
+
+13. CI/CD & Git strategy
+Repo layout:
+/shop
+  .github/workflows/ci.yml
+  docker/
+    Dockerfile.backend
+    Dockerfile.frontend
+  infra/
+  services/
+    backend/
+      app/
+      tests/
+      requirements.txt
+      Dockerfile
+    frontend/
+      src/
+      tests/
+      package.json
+  docs/
+    architecture.md
+    api-spec.yaml
+  scripts/
+  README.md
+Branching:
+- main/master
+- develop
+- feature/*
+- hotfix/*
+- release/*
+Commits: conventional commits, PR reviews, CI passing
+CI pipeline: lint, unit tests, build Docker, security checks, staging deploy, prod deploy gated
+
+14. Deployment & infra
+- Dev: Docker Compose (Postgres, Redis, backend, frontend)
+- Staging & Prod: Kubernetes cluster or managed app service
+- DB: managed PostgreSQL w/ read replicas & backups
+- Object storage: S3
+- Secrets: Vault/cloud secret manager
+- TLS: ingress + cert-manager
+- Horizontal autoscaling
+- Blue/green or canary deploy
+
+15. Documentation & developer experience
+- OpenAPI docs / Swagger
+- README with dev setup
+- CONTRIBUTING.md
+- Architecture Decision Records (ADR)
+- Postman collection / curl examples
+- API changelog & versioning
+
+16. Sample README (starter)
+# SmallShop
+SmallShop is a web-based e-commerce platform.
+Quickstart (dev):
+- Copy .env.example -> .env
+- docker-compose up --build
+- Backend: localhost:8000
+- Frontend: localhost:3000
+- API docs: localhost:8000/docs
+Tests:
+- Backend: docker-compose run backend pytest
+- Frontend: npm test
+Deploy:
+- CI builds Docker images
+- CD deploys manifests to k8s cluster
+See docs/ for full architecture and infra
+
+17. Example minimal OpenAPI
+- Schemas: Product, Variant, Cart, Order, User, Address
+- Endpoints: auth, products, cart, checkout
+- Request/response examples
+
+18. Security checklist
+- Enforce HTTPS
+- Strong password + MFA for admin
+- CSP, XSS/CSRF protection
+- Rotate secrets
+- Regular backups & restore tests
+- PCI compliance
+
+19. Next steps / deliverables
+Options:
+- Backend skeleton (FastAPI) w/ models, auth, core endpoints, tests
+- Frontend skeleton (React + TS) w/ product listing, cart, checkout
+- Docker Compose dev setup + seed data
+- OpenAPI yaml
+- Kubernetes manifests + CI pipeline
+- E2E test suite (Playwright)
+
+The implementation must reflect industry-standard software engineering practices, such as writing maintainable and readable code, adhering to SOLID principles, applying design patterns appropriately, and ensuring robust error handling. It should follow security best practices and be prepared for deployment in a production environment. Complex business logic and architectural choices should be clearly documented with thorough in-code comments to facilitate understanding and future maintenance.

@@ -1,0 +1,1 @@
+Contextual Translation. Source language: Italian. Target language: English. Visual context (objects in photo): menu, restaurant, fork, plate. Text from image (OCR): "acqua minerale con gas". Translate the text considering the context.

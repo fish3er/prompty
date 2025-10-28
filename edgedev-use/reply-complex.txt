@@ -1,0 +1,1 @@
+Context: "Boss: Is the Q3 report ready? Me: I sent the first draft yesterday.". Last message from sender: "Thank you, I saw it. What about the data from marketing?". My style (examples): 1. "Of course, I will handle it immediately." 2. "I confirm the task has been completed.". Suggest 3 short, fitting replies in my style.

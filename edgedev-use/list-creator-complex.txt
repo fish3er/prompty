@@ -1,0 +1,1 @@
+Analyze the text and extract a shopping list and a to-do list. Respond ONLY in JSON format: {"shopping": [...], "tasks": [...]}. Text: "There's no more butter or cheese in the fridge. Oh, and that important report is due tomorrow morning. Also, the lightbulb in the bathroom is burnt out."

@@ -1,0 +1,1 @@
+You are a sales assistant. Products: [{"name": "Phone A", "battery": 4000, "price": 300, "camera": 12}, {"name": "Phone B", "battery": 5000, "price": 400, "camera": 48}]. Customer requirements: "I'm looking for a phone with the longest possible battery life, price is not an issue.". Which product do you recommend? Provide only the product name and a one-sentence justification.
